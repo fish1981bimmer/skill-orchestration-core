@@ -1,0 +1,191 @@
+{
+  "state": {
+    "currentStage": null,
+    "status": "completed",
+    "stageResults": {
+      "1": {
+        "name": "需求分析",
+        "status": "orchestrated",
+        "skills": [
+          "writing-plans"
+        ],
+        "timestamp": "2026-06-13T09:05:59.980418"
+      },
+      "2": {
+        "name": "计划",
+        "status": "orchestrated",
+        "skills": [
+          "writing-plans"
+        ],
+        "timestamp": "2026-06-13T09:05:59.981306"
+      },
+      "3": {
+        "name": "开发",
+        "status": "orchestrated",
+        "skills": [
+          "test-driven-development",
+          "subagent-driven-development"
+        ],
+        "timestamp": "2026-06-13T09:05:59.982293"
+      },
+      "4": {
+        "name": "验证与文档",
+        "status": "orchestrated",
+        "skills": [
+          "requesting-code-review"
+        ],
+        "timestamp": "2026-06-13T09:05:59.983223"
+      }
+    },
+    "startTime": "2026-06-13T09:05:59.979025",
+    "endTime": "2026-06-13T09:05:59.983663"
+  },
+  "parsed": {
+    "metadata": {
+      "name": "example-project",
+      "description": "示例项目 - 演示 skill 编排系统的使用",
+      "version": "2.0.0"
+    },
+    "workflow": [
+      {
+        "number": 1,
+        "name": "需求分析",
+        "skills": [
+          "writing-plans"
+        ],
+        "tasks": [
+          "分析需求",
+          "编写用户故事",
+          "定义功能列表"
+        ],
+        "outputs": [
+          "requirements.md",
+          "user-stories.md",
+          "features.md"
+        ]
+      },
+      {
+        "number": 2,
+        "name": "计划",
+        "skills": [
+          "writing-plans"
+        ],
+        "tasks": [
+          "编写实现计划",
+          "定义技术方案",
+          "制定测试策略"
+        ],
+        "outputs": [
+          "IMPLEMENTATION.md",
+          "docs/technical-design.md",
+          "docs/test-plan.md"
+        ]
+      },
+      {
+        "number": 3,
+        "name": "开发",
+        "skills": [
+          "test-driven-development",
+          "subagent-driven-development"
+        ],
+        "tasks": [
+          "编写测试",
+          "实现功能",
+          "代码审查"
+        ],
+        "outputs": [
+          "src/",
+          "tests/",
+          "docs/code-review.md"
+        ]
+      },
+      {
+        "number": 4,
+        "name": "验证与文档",
+        "skills": [
+          "requesting-code-review"
+        ],
+        "tasks": [
+          "代码安全扫描",
+          "质量检查",
+          "生成文档"
+        ],
+        "outputs": [
+          "docs/code-review.md",
+          "docs/api-docs.md"
+        ]
+      }
+    ],
+    "context": {
+      "writing-plans": {
+        "input": [
+          "requirements.md"
+        ],
+        "output": [
+          "IMPLEMENTATION.md"
+        ],
+        "pass_to": "test-driven-development"
+      },
+      "test-driven-development": {
+        "input": "IMPLEMENTATION.md",
+        "output": [
+          "tests/",
+          "src/"
+        ],
+        "pass_to": "requesting-code-review"
+      },
+      "requesting-code-review": {
+        "input": [
+          "tests/",
+          "src/"
+        ],
+        "output": [
+          "docs/code-review.md"
+        ]
+      }
+    },
+    "validation": {
+      "writing-plans": {
+        "required_sections": [
+          "overview",
+          "implementation",
+          "testing"
+        ],
+        "format": "markdown",
+        "max_length": 10000
+      },
+      "test-driven-development": {
+        "test_coverage": 80,
+        "expected_outputs": [
+          "tests/",
+          "src/"
+        ]
+      },
+      "requesting-code-review": {
+        "check_severity": "high",
+        "expected_outputs": [
+          "docs/code-review.md"
+        ]
+      }
+    },
+    "state": {
+      "checkpoints": [
+        {
+          "name": "requirements_complete",
+          "after": "writing-plans"
+        },
+        {
+          "name": "tests_complete",
+          "after": "test-driven-development"
+        },
+        {
+          "name": "code_reviewed",
+          "after": "requesting-code-review"
+        }
+      ],
+      "auto_save": true,
+      "save_interval": 300
+    }
+  },
+  "timestamp": "2026-06-13T11:22:22.956440"
+}
