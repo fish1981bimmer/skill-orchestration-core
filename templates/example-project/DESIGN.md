@@ -1,7 +1,7 @@
 ---
 name: example-project
 description: 示例项目 - 演示 skill 编排系统的使用
-version: 1.0.0
+version: 2.0.0
 ---
 
 # 示例项目设计编排指南
@@ -9,6 +9,7 @@ version: 1.0.0
 ## 概述
 
 这是一个示例项目，演示如何使用 skill 编排系统进行系统化开发。
+项目模板使用昌叔工作环境可用的 skill，不依赖 huashu-design-integration 或 obsidian。
 
 ## 工作流程
 
@@ -27,21 +28,7 @@ version: 1.0.0
 - user-stories.md
 - features.md
 
-### 阶段 2: 设计
-
-**使用的 Skills**:
-- huashu-design-integration
-
-**任务**:
-- 创建原型
-- 设计评审
-- 导出设计规范
-
-**输出**:
-- design/prototypes/
-- docs/design-spec.md
-
-### 阶段 3: 计划
+### 阶段 2: 计划
 
 **使用的 Skills**:
 - writing-plans
@@ -56,7 +43,7 @@ version: 1.0.0
 - docs/technical-design.md
 - docs/test-plan.md
 
-### 阶段 4: 开发
+### 阶段 3: 开发
 
 **使用的 Skills**:
 - test-driven-development
@@ -72,36 +59,36 @@ version: 1.0.0
 - tests/
 - docs/code-review.md
 
-### 阶段 5: 文档
+### 阶段 4: 验证与文档
 
 **使用的 Skills**:
-- obsidian
+- requesting-code-review
 
 **任务**:
+- 代码安全扫描
+- 质量检查
 - 生成文档
-- 保存到知识库
-- 建立链接
 
 **输出**:
-- docs/
-- wiki/
+- docs/code-review.md
+- docs/api-docs.md
 
 ## 上下文传递
 
 context:
   writing-plans:
-    output: [requirements.md, IMPLEMENTATION.md]
+    input: [requirements.md]
+    output: [IMPLEMENTATION.md]
     pass_to: test-driven-development
-  
+
   test-driven-development:
     input: IMPLEMENTATION.md
     output: [tests/, src/]
-    pass_to: github-code-review
-  
-  github-code-review:
+    pass_to: requesting-code-review
+
+  requesting-code-review:
     input: [tests/, src/]
-    output: docs/code-review.md
-    pass_to: obsidian
+    output: [docs/code-review.md]
 
 ## 质量验证
 
@@ -110,14 +97,14 @@ validation:
     required_sections: [overview, implementation, testing]
     format: markdown
     max_length: 10000
-  
+
   test-driven-development:
     test_coverage: 80
-    test_style: pytest
-  
-  github-code-review:
+    expected_outputs: [tests/, src/]
+
+  requesting-code-review:
     check_severity: high
-    auto_fix: false
+    expected_outputs: [docs/code-review.md]
 
 ## 状态管理
 
@@ -128,7 +115,7 @@ state:
     - name: tests_complete
       after: test-driven-development
     - name: code_reviewed
-      after: github-code-review
-  
+      after: requesting-code-review
+
   auto_save: true
   save_interval: 300
