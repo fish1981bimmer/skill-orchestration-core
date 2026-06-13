@@ -1,8 +1,8 @@
 # Skill 编排核心 - 快速开始指南
 
-欢迎使用 Skill 编排核心！这个指南将帮助你快速上手并开始使用。
+欢迎使用 Skill 编排核心！5 分钟上手。
 
-## 5 分钟快速开始
+## 快速开始
 
 ### 步骤 1: 创建项目
 
@@ -13,41 +13,42 @@ cd my-project
 
 # 复制示例 DESIGN.md
 cp ~/.hermes/skills/devops/skill-orchestration-core/templates/example-project/DESIGN.md .
+
+# 或使用其他模板
+# cp -r ~/.hermes/skills/devops/skill-orchestration-core/templates/web-fullstack .
+# cp -r ~/.hermes/skills/devops/skill-orchestration-core/templates/data-analysis .
+# cp -r ~/.hermes/skills/devops/skill-orchestration-core/templates/api-product .
 ```
 
-### 步骤 2: 查看示例
+### 步骤 2: 查看和修改 DESIGN.md
 
 ```bash
-# 查看示例 DESIGN.md
 cat DESIGN.md
+# 编辑以适配你的项目...
 ```
 
 ### 步骤 3: 解析流程
 
 ```bash
-# 解析 DESIGN.md
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/workflow-orchestrator.js parse DESIGN.md
+python3 ~/.hermes/skills/devops/skill-orchestration-core/scripts/workflow_orchestrator.py parse DESIGN.md
 ```
 
 ### 步骤 4: 初始化上下文
 
 ```bash
-# 初始化上下文
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/context-manager.js save
+python3 ~/.hermes/skills/devops/skill-orchestration-core/scripts/context_manager.py show
 ```
 
 ### 步骤 5: 加载验证规则
 
 ```bash
-# 从 DESIGN.md 加载验证规则
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/output-validator.js load-design DESIGN.md
+python3 ~/.hermes/skills/devops/skill-orchestration-core/scripts/output_validator.py load-design DESIGN.md
+python3 ~/.hermes/skills/devops/skill-orchestration-core/scripts/output_validator.py validate-all .
 ```
 
 ## 下一步
 
 ### 修改 DESIGN.md
-
-根据你的项目需求修改 DESIGN.md 文件：
 
 ```yaml
 ---
@@ -78,142 +79,103 @@ version: 1.0.0
 
 ```bash
 # 设置数据
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/context-manager.js set requirements '{"title":"My Requirements"}'
+python3 ~/.hermes/skills/devops/skill-orchestration-core/scripts/context_manager.py set requirements "plan content"
 
 # 获取数据
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/context-manager.js get requirements
+python3 ~/.hermes/skills/devops/skill-orchestration-core/scripts/context_manager.py get requirements
 
 # 查看上下文
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/context-manager.js show
+python3 ~/.hermes/skills/devops/skill-orchestration-core/scripts/context_manager.py show
+
+# 标记 skill 完成
+python3 ~/.hermes/skills/devops/skill-orchestration-core/scripts/context_manager.py complete writing-plans
 ```
 
 ### 使用流程编排
 
 ```bash
 # 解析 DESIGN.md
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/workflow-orchestrator.js parse DESIGN.md
+python3 ~/.hermes/skills/devops/skill-orchestration-core/scripts/workflow_orchestrator.py parse DESIGN.md
 
 # 查看状态
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/workflow-orchestrator.js status DESIGN.md
+python3 ~/.hermes/skills/devops/skill-orchestration-core/scripts/workflow_orchestrator.py status DESIGN.md
 
-# 查看进度
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/workflow-orchestrator.js progress DESIGN.md
+# 设置检查点
+python3 ~/.hermes/skills/devops/skill-orchestration-core/scripts/workflow_orchestrator.py checkpoint DESIGN.md my-checkpoint
+
+# 恢复检查点
+python3 ~/.hermes/skills/devops/skill-orchestration-core/scripts/workflow_orchestrator.py restore DESIGN.md my-checkpoint
 ```
 
 ### 使用质量验证
 
 ```bash
-# 验证输出
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/output-validator.js validate writing-plans "$(cat IMPLEMENTATION.md)"
+# 验证所有 skill 输出
+python3 ~/.hermes/skills/devops/skill-orchestration-core/scripts/output_validator.py validate-all .
+
+# 自动修复缺失内容
+python3 ~/.hermes/skills/devops/skill-orchestration-core/scripts/output_validator.py auto-fix writing-plans .
 
 # 获取验证报告
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/output-validator.js report
+python3 ~/.hermes/skills/devops/skill-orchestration-core/scripts/output_validator.py report
 ```
 
-## 常用命令
+## 工作流模板
+
+| 模板 | 阶段数 | 适用场景 |
+|------|--------|----------|
+| example-project | 4 | 学习和测试编排系统 |
+| web-fullstack | 5 | React + FastAPI 全栈开发 |
+| data-analysis | 5 | 数据采集/清洗/建模/报告 |
+| api-product | 4 | 免费 API 组合成商业产品 |
+
+## 常用命令速查
 
 ### 上下文管理
 
 ```bash
-# 查看上下文
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/context-manager.js show
-
-# 保存上下文
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/context-manager.js save
-
-# 加载上下文
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/context-manager.js load
-
-# 清理上下文
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/context-manager.js clear
-
-# 获取值
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/context-manager.js get <key>
-
-# 设置值
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/context-manager.js set <key> <value>
+python3 scripts/context_manager.py show [project_path]
+python3 scripts/context_manager.py status [project_path]
+python3 scripts/context_manager.py get <key> [project_path]
+python3 scripts/context_manager.py set <key> <value> [project_path]
+python3 scripts/context_manager.py complete <skill_name> [project_path]
+python3 scripts/context_manager.py clear [project_path]
 ```
 
 ### 流程编排
 
 ```bash
-# 解析 DESIGN.md
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/workflow-orchestrator.js parse DESIGN.md
-
-# 查看状态
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/workflow-orchestrator.js status DESIGN.md
-
-# 查看进度
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/workflow-orchestrator.js progress DESIGN.md
-
-# 设置检查点
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/workflow-orchestrator.js checkpoint DESIGN.md <name>
-
-# 恢复检查点
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/workflow-orchestrator.js restore DESIGN.md <name>
-
-# 列出检查点
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/workflow-orchestrator.js checkpoints DESIGN.md
+python3 scripts/workflow_orchestrator.py parse <DESIGN.md>
+python3 scripts/workflow_orchestrator.py execute <DESIGN.md>
+python3 scripts/workflow_orchestrator.py status <DESIGN.md>
+python3 scripts/workflow_orchestrator.py checkpoint <DESIGN.md> <name>
+python3 scripts/workflow_orchestrator.py restore <DESIGN.md> <name>
+python3 scripts/workflow_orchestrator.py jump <DESIGN.md> <stage_name>
 ```
 
-### 质量验证
+### 输出验证
 
 ```bash
-# 从 DESIGN.md 加载验证规则
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/output-validator.js load-design DESIGN.md
-
-# 验证输出
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/output-validator.js validate <skill> <output>
-
-# 获取验证报告
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/output-validator.js report
+python3 scripts/output_validator.py validate <skill> [project_path]
+python3 scripts/output_validator.py validate-all [project_path]
+python3 scripts/output_validator.py auto-fix <skill> [project_path]
+python3 scripts/output_validator.py load-design <DESIGN.md>
+python3 scripts/output_validator.py report
 ```
 
-## 项目结构
+## 端到端测试
 
-```
-my-project/
-├── DESIGN.md                          # 设计编排指南
-├── .orchestration/                   # 编排系统目录
-│   ├── context.json                  # 上下文文件
-│   ├── state.json                    # 状态文件
-│   └── checkpoints/                  # 检查点
-│       ├── checkpoint-001.json
-│       └── checkpoint-002.json
-├── requirements.md                   # 需求文档
-├── IMPLEMENTATION.md                 # 实现计划
-├── src/                              # 源代码
-├── tests/                            # 测试
-└── docs/                             # 文档
+修改解析逻辑后验证：
+
+```bash
+cd scripts && python3 test_e2e.py
 ```
 
-## 示例项目
+## 更多资源
 
-### 简单项目
-
-参见 `templates/example-project/` 目录中的示例项目。
-
-### 复杂项目
-
-参见 `templates/complex-project/` 目录中的复杂项目示例。
-
-## 下一步学习
-
-- 阅读 [README.md](templates/README.md) 了解更多详细信息
-- 查看 [SKILL.md](../SKILL.md) 了解完整的 API 文档
-- 查看 [examples/](../examples/) 目录中的更多示例
-
-## 获取帮助
-
-如果遇到问题：
-
-1. 查看 [常见问题](../SKILL.md#常见问题)
-2. 查看 [示例项目](../templates/example-project/)
-3. 查看 [最佳实践](../SKILL.md#最佳实践)
-
-## 贡献
-
-欢迎贡献改进建议和最佳实践！
+- [README.md](templates/README.md) — 详细说明
+- [SKILL.md](SKILL.md) — 完整 API 文档和陷阱列表
+- [example-project/](templates/example-project/) — 完整示例项目
 
 ## 许可证
 
