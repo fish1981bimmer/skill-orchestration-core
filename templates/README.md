@@ -13,6 +13,11 @@ cd my-project
 
 # 复制示例 DESIGN.md
 cp ~/.hermes/skills/devops/skill-orchestration-core/templates/example-project/DESIGN.md .
+
+# 或使用其他模板
+# cp -r ~/.hermes/skills/devops/skill-orchestration-core/templates/web-fullstack .
+# cp -r ~/.hermes/skills/devops/skill-orchestration-core/templates/data-analysis .
+# cp -r ~/.hermes/skills/devops/skill-orchestration-core/templates/api-product .
 ```
 
 ### 2. 修改 DESIGN.md
@@ -23,13 +28,13 @@ cp ~/.hermes/skills/devops/skill-orchestration-core/templates/example-project/DE
 
 ```bash
 # 使用上下文管理器
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/context-manager.js show
+python3 ~/.hermes/skills/devops/skill-orchestration-core/scripts/context_manager.py show
 
 # 使用流程编排器
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/workflow-orchestrator.js parse DESIGN.md
+python3 ~/.hermes/skills/devops/skill-orchestration-core/scripts/workflow_orchestrator.py parse DESIGN.md
 
 # 使用输出验证器
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/output-validator.js load-design DESIGN.md
+python3 ~/.hermes/skills/devops/skill-orchestration-core/scripts/output_validator.py validate-all .
 ```
 
 ## 核心功能
@@ -38,86 +43,138 @@ node ~/.hermes/skills/devops/skill-orchestration-core/scripts/output-validator.j
 
 管理 skill 之间的上下文传递和共享。
 
-```javascript
-const ContextManager = require('./scripts/context-manager.js');
+```python
+from context_manager import ContextManager
 
-const context = new ContextManager('/path/to/project');
+ctx = ContextManager("/path/to/project")
+ctx.load()
 
-// 保存数据
-context.set('plan', planContent);
+# 保存数据
+ctx.set("plan", plan_content)
 
-// 获取数据
-const plan = context.get('plan');
+# 获取数据
+plan = ctx.get("plan")
 
-// 传递给下一个 skill
-context.passTo('test-driven-development');
+# 传递给下一个 skill
+ctx.pass_to("test-driven-development")
 
-// 保存到文件
-context.save();
+# 标记完成
+ctx.mark_skill_completed("writing-plans")
+
+# 保存到文件
+ctx.save()
 ```
 
 ### 2. 流程编排
 
-基于 DESIGN.md 的流程编排。
+基于 DESIGN.md 的流程编排，**集成 Hermes delegate_task 真正执行 skill**。
 
-```javascript
-const WorkflowOrchestrator = require('./scripts/workflow-orchestrator.js');
+```python
+from workflow_orchestrator import WorkflowOrchestrator
 
-const orchestrator = new WorkflowOrchestrator('/path/to/DESIGN.md');
+orch = WorkflowOrchestrator("/path/to/DESIGN.md")
+parsed = orch.parse_design()
 
-// 执行流程
-await orchestrator.execute();
+# 执行流程
+orch.execute()
 
-// 暂停
-orchestrator.pause();
+# 控制
+orch.pause()
+orch.resume()
+orch.jump_to("开发")
 
-// 恢复
-await orchestrator.resume();
-
-// 获取状态
-const status = orchestrator.getStatus();
+# 检查点
+orch.set_checkpoint("checkpoint-需求分析")
+orch.restore_checkpoint("checkpoint-需求分析")
 ```
 
 ### 3. 质量保证
 
-自动验证 skill 输出质量。
+自动验证 skill 输出质量，**真正读取项目文件做验证**。
 
-```javascript
-const OutputValidator = require('./scripts/output-validator.js');
+```python
+from output_validator import OutputValidator
 
-const validator = new OutputValidator();
+validator = OutputValidator("/path/to/project")
 
-// 添加验证规则
-validator.addRule('writing-plans', {
-  requiredSections: ['overview', 'implementation', 'testing'],
-  format: 'markdown',
-  maxLength: 10000
-});
+# 从 DESIGN.md 加载规则
+validator.load_from_design("/path/to/DESIGN.md")
 
-// 验证输出
-const result = await validator.validate('writing-plans', output);
+# 验证单个 skill
+result = validator.validate("writing-plans")
+# result: {"valid": True/False, "errors": [...], "warnings": [...], "fixable": True/False}
 
-if (!result.valid) {
-  console.error('验证失败:', result.errors);
-}
+# 验证所有
+results = validator.validate_all()
+
+# 自动修复
+validator.auto_fix("writing-plans")
+
+# 获取报告
+report = validator.get_report()
 ```
+
+## CLI 接口
+
+### 上下文管理器
+
+```bash
+python3 scripts/context_manager.py show [project_path]
+python3 scripts/context_manager.py status [project_path]
+python3 scripts/context_manager.py set <key> <value> [project_path]
+python3 scripts/context_manager.py get <key> [project_path]
+python3 scripts/context_manager.py complete <skill_name> [project_path]
+python3 scripts/context_manager.py clear [project_path]
+```
+
+### 流程编排器
+
+```bash
+python3 scripts/workflow_orchestrator.py parse <DESIGN.md>
+python3 scripts/workflow_orchestrator.py execute <DESIGN.md>
+python3 scripts/workflow_orchestrator.py status <DESIGN.md>
+python3 scripts/workflow_orchestrator.py checkpoint <DESIGN.md> <name>
+python3 scripts/workflow_orchestrator.py restore <DESIGN.md> <name>
+python3 scripts/workflow_orchestrator.py jump <DESIGN.md> <stage_name>
+```
+
+### 输出验证器
+
+```bash
+python3 scripts/output_validator.py validate <skill> [project_path]
+python3 scripts/output_validator.py validate-all [project_path]
+python3 scripts/output_validator.py auto-fix <skill> [project_path]
+python3 scripts/output_validator.py load-design <DESIGN.md>
+python3 scripts/output_validator.py report
+```
+
+## 工作流模板
+
+| 模板 | 路径 | 阶段数 | 适用场景 |
+|------|------|--------|----------|
+| 示例项目 | `templates/example-project/` | 4 | 学习和测试编排系统 |
+| Web 全栈 | `templates/web-fullstack/` | 5 | React + FastAPI 全栈开发 |
+| 数据分析 | `templates/data-analysis/` | 5 | 数据采集/清洗/建模/报告 |
+| API 产品 | `templates/api-product/` | 4 | 免费 API 组合成商业产品 |
 
 ## 项目结构
 
 ```
 project/
-├── DESIGN.md                          # 设计编排指南
-├── .orchestration/                   # 编排系统目录
-│   ├── context.json                  # 上下文文件
-│   ├── state.json                    # 状态文件
-│   └── checkpoints/                  # 检查点
-│       ├── checkpoint-001.json
-│       └── checkpoint-002.json
-├── requirements.md                   # 需求文档
-├── IMPLEMENTATION.md                 # 实现计划
-├── src/                              # 源代码
-├── tests/                            # 测试
-└── docs/                             # 文档
+├── DESIGN.md           # 设计编排指南
+├── .orchestration/     # 编排系统目录
+│   ├── context.json    # 上下文文件
+│   ├── state.json      # 状态文件
+│   ├── .context.lock   # 上下文文件锁
+│   ├── .state.lock     # 状态文件锁
+│   └── checkpoints/    # 检查点
+│       ├── checkpoint-需求分析.json
+│       └── checkpoint-开发.json
+├── requirements.md     # 需求文档
+├── IMPLEMENTATION.md   # 实现计划
+├── src/                # 源代码
+├── tests/              # 测试
+└── docs/               # 文档
 ```
 
 ## 使用示例
@@ -154,36 +211,36 @@ version: 1.0.0
 EOF
 
 # 解析 DESIGN.md
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/workflow-orchestrator.js parse DESIGN.md
+python3 ~/.hermes/skills/devops/skill-orchestration-core/scripts/workflow_orchestrator.py parse DESIGN.md
 ```
 
 ### 示例 2: 上下文管理
 
 ```bash
-# 初始化上下文
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/context-manager.js save
+# 查看上下文
+python3 ~/.hermes/skills/devops/skill-orchestration-core/scripts/context_manager.py show
 
 # 设置数据
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/context-manager.js set plan '{"title":"My Plan"}'
+python3 ~/.hermes/skills/devops/skill-orchestration-core/scripts/context_manager.py set plan "plan content"
 
 # 获取数据
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/context-manager.js get plan
+python3 ~/.hermes/skills/devops/skill-orchestration-core/scripts/context_manager.py get plan
 
-# 查看上下文
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/context-manager.js show
+# 标记 skill 完成
+python3 ~/.hermes/skills/devops/skill-orchestration-core/scripts/context_manager.py complete writing-plans
 ```
 
 ### 示例 3: 质量验证
 
 ```bash
 # 从 DESIGN.md 加载验证规则
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/output-validator.js load-design DESIGN.md
+python3 ~/.hermes/skills/devops/skill-orchestration-core/scripts/output_validator.py load-design DESIGN.md
 
-# 验证输出
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/output-validator.js validate writing-plans "$(cat IMPLEMENTATION.md)"
+# 验证所有 skill 输出
+python3 ~/.hermes/skills/devops/skill-orchestration-core/scripts/output_validator.py validate-all .
 
 # 获取验证报告
-node ~/.hermes/skills/devops/skill-orchestration-core/scripts/output-validator.js report
+python3 ~/.hermes/skills/devops/skill-orchestration-core/scripts/output_validator.py report
 ```
 
 ## 最佳实践
@@ -212,9 +269,10 @@ node ~/.hermes/skills/devops/skill-orchestration-core/scripts/output-validator.j
 
 A: 使用上下文压缩：
 
-```javascript
-context.config.contextCompression = true;
-context.config.maxContextSize = 50000;
+```python
+ctx.context["config"]["contextCompression"] = True
+ctx.context["config"]["maxContextSize"] = 50000
+ctx.save()
 ```
 
 ### Q: 如何处理长时间运行的项目？
@@ -234,14 +292,18 @@ state:
 
 A: 使用质量验证：
 
-```javascript
-const validator = new OutputValidator();
-const result = await validator.validate('writing-plans', output);
-
-if (!result.valid) {
-  console.error('验证失败:', result.errors);
-}
+```python
+validator = OutputValidator("/path/to/project")
+validator.load_from_design("DESIGN.md")
+results = validator.validate_all()
+for skill, result in results.items():
+    print(f"{skill}: {'PASS' if result['valid'] else 'FAIL'}")
 ```
+
+### Q: DESIGN.md 中的 YAML 解析失败？
+
+A: 确保 YAML 内容不以 ```yaml 代码块包裹（编排器已兼容两种格式，但推荐裸写）。
+同时注意 YAML 缩进必须一致，使用空格而非 Tab。
 
 ## 贡献
 
