@@ -1,0 +1,28 @@
+{
+  "project": {
+    "name": "example-project",
+    "path": "/Users/a1234/.hermes/skills/devops/skill-orchestration-core/templates/example-project",
+    "description": ""
+  },
+  "state": {
+    "currentSkill": "test-driven-development",
+    "progress": 50.0,
+    "completedSkills": [
+      "writing-plans"
+    ],
+    "startTime": "2026-06-13T11:22:22.953635"
+  },
+  "data": {
+    "requirements": {
+      "features": [
+        "用户注册",
+        "登录",
+        "权限管理"
+      ]
+    }
+  },
+  "config": {
+    "contextCompression": true,
+    "maxContextSize": 100000
+  }
+}
